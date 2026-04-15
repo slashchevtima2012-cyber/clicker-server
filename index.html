@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clicker RPG</title>
+<style>
+body{margin:0;font-family:Arial;background:#0b1220;color:#fff;text-align:center}
+nav{display:flex;justify-content:space-around;background:#111827;padding:10px;position:sticky;top:0}
+nav button{background:#1f2937;border:none;color:#fff;padding:8px;border-radius:8px}
+.screen{display:none;padding:15px}
+.active{display:block}
+.bigbtn{font-size:28px;padding:20px 40px;border:none;border-radius:15px;background:#3b82f6;color:#fff}
+.card{background:#1e293b;margin:8px;padding:10px;border-radius:10px}
+.small{font-size:12px;opacity:.8}
+#assistant{background:#0f172a;border:1px solid #334155;padding:10px;border-radius:10px;margin-top:10px}
+</style>
+</head>
+<body>
+
+<nav>
+<button onclick="show('game')">Игра</button>
+<button onclick="show('shop')">Магазин</button>
+<button onclick="show('ach')">Достижения</button>
+<button onclick="show('stats')">Статы</button>
+</nav>
+
+<div id="game" class="screen active">
+<h2>🔥 Clicker RPG</h2>
+<button class="bigbtn" onclick="clicker()">КЛИК</button>
+<p>Очки: <span id="score">0</span></p>
+<p>За клик: <span id="power">1</span> | Авто: <span id="auto">0</span></p>
+<p>Уровень: <span id="lvl">1</span></p>
+<div id="assistant">🤖 Помощник: Привет! Я буду помогать тебе и подбадривать 🙂</div>
+</div>
+
+<div id="shop" class="screen">
+<h2>🛒 Магазин (50 улучшений)</h2>
+<div id="shopList"></div>
+</div>
+
+<div id="ach" class="screen">
+<h2>🏆 Достижения</h2>
+<p id="achlist"></p>
+</div>
+
+<div id="stats" class="screen">
+<h2>📊 Статистика</h2>
+<p>Всего кликов: <span id="total">0</span></p>
+<p>Покупок: <span id="buyc">0</span></p>
+</div>
+
+<script>
+let score=0,power=1,auto=0,total=0,lvl=1,buyCount=0;
+let ach=[];
+
+// ===== 50 УЛУЧШЕНИЙ =====
+let upgrades=[];
+for(let i=1;i<=50;i++){
+upgrades.push({
+name:"Улучшение "+i,
+cost: Math.floor(20*Math.pow(1.15,i)),
+power: i%2===0?1:0,
+auto: i%2===1?1:0,
+bought:false
+});
+}
+
+function renderShop(){
+let shop=document.getElementById('shopList');
+shop.innerHTML="";
+upgrades.forEach((u,i)=>{
+let div=document.createElement('div');
+div.className="card";
+div.innerHTML=`<b>${u.name}</b><br>Цена: ${u.cost}<br>+${u.power} клик / +${u.auto} авто<br><button onclick="buy(${i})">Купить</button>`;
+shop.appendChild(div);
+});
+}
+
+function clicker(){score+=power;total+=power;check();update();save();assistantTalk();}
+
+function buy(i){let u=upgrades[i];if(score>=u.cost&&!u.bought){score-=u.cost;u.bought=true;power+=u.power;auto+=u.auto;buyCount++;assistantTalk(true);update();renderShop();save();}}
+
+function assistantTalk(buy){let a=document.getElementById('assistant');
+let msgs=["Ты справляешься отлично!","Продолжай, ты становишься сильнее 💪","Я верю в тебя!","Хороший прогресс 🚀","Так держать!"];
+if(buy){msgs=["Отличная покупка!","Это усилит тебя 🔥","Ты растёшь как игрок!","Супер выбор 😎"]}
+a.innerText="🤖 Помощник: "+msgs[Math.floor(Math.random()*msgs.length)];}
+
+function check(){if(total>1000)lvl=2;if(total>5000)lvl=3;}
+
+function update(){
+document.getElementById('score').innerText=score;
+document.getElementById('power').innerText=power;
+document.getElementById('auto').innerText=auto;
+document.getElementById('lvl').innerText=lvl;
+document.getElementById('total').innerText=total;
+document.getElementById('buyc').innerText=buyCount;
+document.getElementById('achlist').innerText=ach.join(', ');
+}
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function save(){localStorage.setItem('game',JSON.stringify({score,power,auto,total,lvl,buyCount,ach,upgrades}));}
+
+function load(){let d=JSON.parse(localStorage.getItem('game'));if(d){score=d.score;power=d.power;auto=d.auto;total=d.total;lvl=d.lvl;buyCount=d.buyCount;ach=d.ach||[];}}
+
+setInterval(()=>{score+=auto;total+=auto;if(auto)check();update();save();},1000);
+
+load();renderShop();update();
+</script>
+
+</body>
+</html>
