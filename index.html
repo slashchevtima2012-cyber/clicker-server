@@ -4,6 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Clicker RPG</title>
+
+<!-- БЛОКИРОВКА ПО IP (ДОБАВЛЕНО) -->
+<script>
+  // Проверяем страну через бесплатный API
+  fetch('https://ip-api.com/json/?fields=status,countryCode,message')
+    .then(response => response.json())
+    .then(data => {
+      // Если страна = RU — блокируем
+      if (data.countryCode === 'RU') {
+        document.body.innerHTML = `
+          <div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;flex-direction:column;text-align:center;padding:20px;background:#0b1220;color:#fff;">
+            <h1 style="color:#ff4444;">🚫 Доступ запрещён</h1>
+            <p style="font-size:18px;color:#aaa;">Ваш регион не обслуживается.</p>
+            <p style="font-size:14px;color:#666;">Если вы считаете, что это ошибка, свяжитесь с администратором.</p>
+          </div>
+        `;
+      }
+    })
+    .catch(() => {
+      // Если API не ответил — тоже блокируем (на всякий случай)
+      document.body.innerHTML = `
+        <div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;flex-direction:column;text-align:center;padding:20px;background:#0b1220;color:#fff;">
+          <h1 style="color:#ff4444;">🚫 Доступ запрещён</h1>
+          <p style="font-size:18px;color:#aaa;">Не удалось проверить ваш регион.</p>
+        </div>
+      `;
+    });
+</script>
+
 <style>
 body{margin:0;font-family:Arial;background:#0b1220;color:#fff;text-align:center}
 nav{display:flex;justify-content:space-around;background:#111827;padding:10px;position:sticky;top:0}
